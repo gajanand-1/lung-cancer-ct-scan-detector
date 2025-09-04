@@ -1,15 +1,8 @@
+# requirements.txt
 
 streamlit
-tensorflow
+tensorflow-cpu
 numpy
 Pillow
-<<<<<<< HEAD
-streamlit
-tensorflow
-numpy
-Pillow
-scikit-learn
-=======
-tensorflow
-scikit-learn
->>>>>>> 65cbb2fb4b026af4ae78f17a267c6aa1c0b3950f
+requests
+tqdm
