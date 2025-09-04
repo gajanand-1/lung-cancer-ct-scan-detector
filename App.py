@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import os
 from PIL import Image
+import requests
 from tensorflow.keras.applications.vgg16 import preprocess_input as preprocess_input_vgg16
 from tensorflow.keras.applications.efficientnet import preprocess_input as preprocess_input_efficientnet
 
@@ -14,43 +15,47 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 
-# --- Dummy File Creation (for first-time run) ---
-# This part creates placeholder models if your actual models aren't found.
-# It ensures the app is runnable out-of-the-box for demonstration.
-# IMPORTANT: Replace these dummy files with your actual trained models.
-def create_dummy_models_if_needed():
-    """Checks for model files and creates dummy ones if they don't exist."""
-    if not os.path.exists('vgg16_model.keras'):
-        st.warning("VGG16 model not found. Creating a dummy model as a placeholder.")
-        dummy_vgg16 = tf.keras.Sequential([
-            tf.keras.layers.Input(shape=(224, 224, 3)),
-            tf.keras.layers.GlobalAveragePooling2D(),
-            tf.keras.layers.Dense(4, activation='softmax')
-        ])
-        dummy_vgg16.save('vgg16_model.keras')
-        st.toast("Dummy VGG16 model created.")
+# --- Function to download a file from a URL ---
+def download_file(url, filename):
+    """Downloads a file from a URL to a local path if it doesn't exist."""
+    if not os.path.exists(filename):
+        try:
+            with st.spinner(f"Downloading model: {os.path.basename(filename)}... This may take a few moments."):
+                with requests.get(url, stream=True) as r:
+                    r.raise_for_status()
+                    with open(filename, 'wb') as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            if chunk:
+                                f.write(chunk)
+            st.toast(f"Downloaded {os.path.basename(filename)} successfully.")
+        except Exception as e:
+            st.error(f"Error downloading {filename}: {e}")
+            st.error("Please check the URL and your internet connection. You may need to restart the app after fixing the issue.")
+            st.stop()
 
-    if not os.path.exists('efficientnet_model.keras'):
-        st.warning("EfficientNet model not found. Creating a dummy model as a placeholder.")
-        dummy_efficientnet = tf.keras.Sequential([
-            tf.keras.layers.Input(shape=(224, 224, 3)),
-            tf.keras.layers.GlobalAveragePooling2D(),
-            tf.keras.layers.Dense(4, activation='softmax')
-        ])
-        dummy_efficientnet.save('efficientnet_model.keras')
-        st.toast("Dummy EfficientNet model created.")
+
+# --- Model URLs and Paths (PASTE YOUR COPIED LINKS HERE) ---
+VGG16_URL = "PASTE_THE_LINK_FOR_VGG16_YOU_COPIED_HERE"
+EFFICIENTNET_URL = "PASTE_THE_LINK_FOR_EFFICIENTNET_YOU_COPIED_HERE"
+
+VGG16_PATH = 'vgg16_model.keras'
+EFFICIENTNET_PATH = 'efficientnet_model.keras'
+
+# --- Download models if they don't exist ---
+download_file(VGG16_URL, VGG16_PATH)
+download_file(EFFICIENTNET_URL, EFFICIENTNET_PATH)
+
 
 # --- Model Loading ---
 @st.cache_resource
 def load_models():
     """Loads the VGG16 and EfficientNet models from disk."""
     try:
-        vgg16_model = tf.keras.models.load_model('vgg16_model.keras')
-        efficientnet_model = tf.keras.models.load_model('efficientnet_model.keras')
+        vgg16_model = tf.keras.models.load_model(VGG16_PATH)
+        efficientnet_model = tf.keras.models.load_model(EFFICIENTNET_PATH)
         return vgg16_model, efficientnet_model
     except Exception as e:
         st.error(f"Error loading models: {e}")
-        st.error("Please ensure your 'vgg16_model.keras' and 'efficientnet_model.keras' files are in the same directory as app.py.")
         return None, None
 
 # --- Image Preprocessing ---
@@ -88,9 +93,6 @@ st.markdown("Upload an image and this app will use two models (VGG16 and Efficie
 
 # Define the class names your model predicts
 CLASS_NAMES = ['adenocarcinoma', 'large.cell.carcinoma', 'normal', 'squamous.cell.carcinoma']
-
-# Create dummy models on first run if needed
-create_dummy_models_if_needed()
 
 # Load the models
 vgg16_model, efficientnet_model = load_models()
