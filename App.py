@@ -35,8 +35,8 @@ def download_file(url, filename):
 
 
 # --- Model URLs and Paths (PASTE YOUR COPIED LINKS HERE) ---
-VGG16_URL = "PASTE_THE_LINK_FOR_VGG16_YOU_COPIED_HERE"
-EFFICIENTNET_URL = "PASTE_THE_LINK_FOR_EFFICIENTNET_YOU_COPIED_HERE"
+VGG16_URL = "https://github.com/gajanand-1/lung-cancer-ct-scan-detector/releases/download/v1.0/vgg16_model.keras"
+EFFICIENTNET_URL = "https://github.com/gajanand-1/lung-cancer-ct-scan-detector/releases/download/v1.0/efficientnet_model.keras"
 
 VGG16_PATH = 'vgg16_model.keras'
 EFFICIENTNET_PATH = 'efficientnet_model.keras'
@@ -145,4 +145,5 @@ if uploaded_file is not None and vgg16_model is not None and efficientnet_model 
             
 st.markdown("---")
 st.write("Built with ❤️ using Streamlit and TensorFlow.")
+
 
